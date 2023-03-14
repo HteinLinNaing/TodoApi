@@ -1,0 +1,302 @@
+1.
+SELECT
+  first_name,
+  last_name,
+  city,
+  country_region
+FROM
+  employees;
+
+----------------------------------------------------------------------
+
+2.
+SELECT
+  id,
+  first_name,
+  last_name
+FROM
+  employees
+WHERE
+  city = "Seattle";
+
+----------------------------------------------------------------------
+
+3.
+SELECT
+  orders.id,
+  orders.order_date,
+  (order_details.quantity * order_details.unit_price) AS Amount
+FROM
+  orders
+  INNER JOIN order_details ON orders.id = order_details.order_id;
+
+----------------------------------------------------------------------
+
+4.
+SELECT
+  orders.id,
+  orders.order_date,
+  orders.ship_name,
+  SUM(order_details.quantity * order_details.unit_price) AS totel_amount
+FROM
+  orders
+  INNER JOIN order_details ON orders.id = order_details.order_id
+GROUP BY
+  orders.id,
+  orders.order_date,
+  orders.ship_name
+ORDER BY
+  orders.order_date DESC;
+
+----------------------------------------------------------------------
+
+5.
+SELECT
+  orders.id,
+  orders.order_date,
+  orders.ship_name,
+  (
+    SELECT
+      SUM(order_details.quantity * order_details.unit_price)
+    FROM
+      order_details
+    WHERE
+      orders.id = order_details.order_id
+  ) AS totel_amount
+FROM
+  orders
+ORDER BY
+  orders.order_date DESC;
+
+----------------------------------------------------------------------
+
+6.
+SELECT
+  employees.id,
+  employees.first_name,
+  employees.last_name,
+  orders.ship_city
+FROM
+  employees
+  INNER JOIN orders ON employees.id = orders.employee_id
+WHERE
+  orders.ship_city = "New York"
+GROUP BY
+  employees.id;
+
+
+----------------------------------------------------------------------
+
+7.
+SELECT
+  orders.order_date,
+  employees.first_name,
+  employees.last_name,
+  customers.first_name,
+  customers.last_name
+FROM
+  orders
+  INNER JOIN employees ON orders.employee_id = employees.id
+  INNER JOIN customers ON orders.customer_id = customers.id
+  INNER JOIN shippers ON orders.shipper_id = shippers.id
+WHERE
+  shippers.company = "Shipping Company A" && customers.city = "New York";
+
+
+----------------------------------------------------------------------
+
+8.
+SELECT
+  employees.id,
+  employees.first_name,
+  employees.last_name,
+  products.product_code
+FROM
+  employees
+  INNER JOIN orders ON employees.id = orders.employee_id
+  INNER JOIN order_details ON orders.id = order_details.order_id
+  INNER JOIN products ON order_details.product_id = products.id
+WHERE
+  products.product_code IN ("NWTB-81", "NWTC-82");
+
+----------------------------------------------------------------------
+
+9.
+SELECT
+  orders.id,
+  orders.order_date
+FROM
+  orders
+WHERE
+  orders.order_date BETWEEN '2006-01-01' AND '2006-01-31';
+
+----------------------------------------------------------------------
+
+10.
+SELECT
+  customers.id,
+  customers.first_name,
+  COUNT(orders.id) AS order_count
+FROM
+  orders
+  INNER JOIN customers ON orders.customer_id = customers.id
+GROUP BY
+  customers.id;
+
+----------------------------------------------------------------------
+
+11.
+SELECT
+  MONTHNAME(order_date) AS months,
+  COUNT(order_date) AS order_count
+FROM
+  orders
+GROUP BY
+  MONTHNAME(order_date), 
+  YEAR(order_date);
+
+----------------------------------------------------------------------
+
+12.
+SELECT
+  order_details.order_id,
+  order_details.product_id,
+  inventory_transactions.comments
+FROM
+  order_details
+  INNER JOIN inventory_transactions ON order_details.product_id = inventory_transactions.product_id
+  AND order_details.order_id = inventory_transactions.customer_order_id;
+----------------------------------------------------------------------
+
+13.
+SELECT
+  customers.id,
+  customers.first_name,
+  customers.last_name,
+  COUNT(orders.id) AS order_count
+FROM
+  customers
+  INNER JOIN orders ON customers.id = orders.customer_id
+GROUP BY
+  customers.id;
+
+----------------------------------------------------------------------
+
+14.
+SELECT
+  customers.id,
+  customers.first_name,
+  customers.last_name,
+  COUNT(orders.id) AS order_count
+FROM
+  customers
+  LEFT JOIN orders ON customers.id = orders.customer_id
+GROUP BY
+  customers.id;
+
+----------------------------------------------------------------------
+
+1.
+SELECT
+  id,
+  first_name,
+  last_name,
+  job_title,
+  city
+FROM
+  customers
+WHERE
+  job_title = "Owner"
+  AND city = "Seattle";
+
+----------------------------------------------------------------------
+
+2.
+SELECT
+  orders.id,
+  orders.order_date,
+  customers.first_name,
+  customers.city
+FROM
+  orders
+  INNER JOIN customers ON orders.customer_id = customers.id
+WHERE
+  customers.city = "Seattle"
+  AND orders.order_date BETWEEN "2006-03-01" AND "2006-03-31";
+
+----------------------------------------------------------------------
+
+3.
+SELECT
+  ship_name,
+  COUNT(*) AS total_orders
+FROM
+  orders
+GROUP BY
+  ship_name;
+
+----------------------------------------------------------------------
+
+4.
+SELECT
+  shippers.company,
+  COUNT(*) AS total_orders
+FROM
+  orders
+  LEFT JOIN shippers ON shippers.id = orders.shipper_id
+GROUP BY
+  shippers.company;
+
+----------------------------------------------------------------------
+
+5.
+SELECT
+  products.id,
+  products.product_name,
+  products.category,
+  SUM(order_details.quantity * order_details.unit_price) AS total_order_amount
+FROM
+  orders
+  INNER JOIN order_details ON orders.id = order_details.order_id
+  INNER JOIN products ON order_details.product_id = products.id
+WHERE
+  products.category = "Beverages"
+  AND orders.order_date BETWEEN "2006-03-01" AND "2006-03-31"
+GROUP BY
+  products.id;
+
+----------------------------------------------------------------------
+
+6.
+SELECT
+  products.id,
+  products.product_name,
+  SUM(purchase_order_details.quantity - order_details.quantity) AS balance_quantity
+FROM
+  products
+  LEFT JOIN order_details ON products.id = order_details.product_id
+  LEFT JOIN purchase_order_details ON order_details.product_id = purchase_order_details.product_id
+GROUP BY
+  products.id;
+
+----------------------------------------------------------------------
+
+7.
+SELECT
+  c.id,
+  c.first_name,
+  COUNT(od.id) AS total_count,
+  SUM(od.quantity * od.unit_price) AS total_order_amount
+FROM
+  customers AS c
+  LEFT JOIN orders o ON c.id = o.customer_id
+  AND o.order_date >= '2006-03-01'
+  AND o.order_date < '2006-04-01'
+  LEFT JOIN order_details AS od ON o.id = od.order_id
+WHERE
+  c.city = 'New York'
+GROUP BY
+  c.id,
+  c.first_name;
+
+----------------------------------------------------------------------

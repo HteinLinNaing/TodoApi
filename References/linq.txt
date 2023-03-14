@@ -1,0 +1,287 @@
+using Microsoft.AspNetCore.Mvc;
+using northwind.Models;
+using Microsoft.EntityFrameworkCore;
+
+namespace northwind.Controllers;
+
+[ApiController]
+[Route("[controller]")]
+public class WeatherForecastController : ControllerBase
+{
+    private static readonly string[] Summaries = new[]
+    {
+        "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
+    };
+
+    private readonly ILogger<WeatherForecastController> _logger;
+    private readonly NorthwindDbContext _context;
+
+    public WeatherForecastController(NorthwindDbContext context, ILogger<WeatherForecastController> logger)
+    {
+        _context = context;
+        _logger = logger;
+    }
+
+    [HttpGet(Name = "GetWeatherForecast")]
+    public IEnumerable<WeatherForecast> Get()
+    {
+        return Enumerable.Range(1, 5).Select(index => new WeatherForecast
+        {
+            Date = DateTime.Now.AddDays(index),
+            TemperatureC = Random.Shared.Next(-20, 55),
+            Summary = Summaries[Random.Shared.Next(Summaries.Length)]
+        })
+        .ToArray();
+    }
+
+    [HttpGet("test")]
+    public async Task<ActionResult<dynamic>> TestQuery()
+    {
+
+        var qry1 = from e in _context.Employees
+                   select new
+                   {
+                       e.FirstName,
+                       e.LastName,
+                       e.City,
+                       e.CountryRegion,
+                       e.BusinessPhone
+                   };
+
+        var qry2 = from e in _context.Employees
+                   where e.City == "Seattle"
+                   select new
+                   {
+                       e.FirstName,
+                       e.LastName,
+                       e.City,
+                       e.CountryRegion,
+                       e.BusinessPhone
+                   };
+
+        var qry3 = from ord in _context.Orders
+                   join ordd in _context.OrderDetails on ord.Id equals ordd.OrderId
+                   select new
+                   {
+                       ord.Id,
+                       ord.OrderDate,
+                       ord.ShipName,
+                       ordd.Quantity,
+                       ordd.UnitPrice,
+                       Amount = (ordd.Quantity * ordd.UnitPrice)
+                   };
+
+        var qry4 = from ord in _context.Orders
+                   join ordd in _context.OrderDetails on ord.Id equals ordd.OrderId
+                   group ordd by new { ord.Id, ord.OrderDate, ord.ShipName } into ordg
+                   orderby ordg.Key.OrderDate descending
+                   select new
+                   {
+                       ordg.Key.Id,
+                       ordg.Key.OrderDate,
+                       ordg.Key.ShipName,
+                       TotalAmount = ordg.Sum(x => x.UnitPrice * x.Quantity)
+                   };
+
+
+        var qry5 = from ord in _context.Orders
+                   orderby ord.OrderDate descending
+                   select new
+                   {
+                       ord.Id,
+                       ord.OrderDate,
+                       ord.ShipName,
+                       TotalAmount = (from ordd in ord.OrderDetails select ordd.Quantity * ordd.UnitPrice).Sum()
+                   };
+
+        var qry6 = from emp in _context.Employees
+                   join ord in _context.Orders on emp.Id equals ord.EmployeeId
+                   where ord.ShipCity == "New York"
+                   group emp by new { emp.Id, emp.FirstName, emp.LastName, ord.ShipCity } into empg
+                   select new
+                   {
+                       empg.Key.Id,
+                       empg.Key.FirstName,
+                       empg.Key.LastName,
+                       empg.Key.ShipCity
+                   };
+
+        var qry7 = from ord in _context.Orders
+                   join emp in _context.Employees on ord.EmployeeId equals emp.Id
+                   join cus in _context.Customers on ord.CustomerId equals cus.Id
+                   join shipper in _context.Shippers on ord.ShipperId equals shipper.Id
+                   where shipper.Company == "Shipping Company A" && cus.City == "New York"
+                   select new
+                   {
+                       orderDate = ord.OrderDate,
+                       employeeName = emp.FirstName + " " + emp.LastName,
+                       customerName = cus.FirstName + " " + emp.LastName,
+                       customerCity = cus.City,
+                       shippingCompany = shipper.Company,
+                   };
+
+        var listProducts = new string[] { "NWTB-81", "NWTC-82", "NWTCS-83" };
+        var qry8 = from emp in _context.Employees
+                   join ord in _context.Orders on emp.Id equals ord.EmployeeId
+                   join ordd in _context.OrderDetails on ord.Id equals ordd.OrderId
+                   join p in _context.Products on ordd.ProductId equals p.Id
+                   where listProducts.Contains(p.ProductCode)
+                   orderby emp.FirstName
+                   select new { emp.FirstName, emp.LastName };
+
+        var qry9 = from ord in _context.Orders
+                   where ord.OrderDate >= new DateTime(2006, 01, 01) && ord.OrderDate < new DateTime(2006, 12, 31)
+                   orderby ord.OrderDate
+                   select ord;
+
+        var qry10 = from cus in _context.Customers
+                    join ord in _context.Orders on cus.Id equals ord.CustomerId
+                    group ord by new { cus.Id, cus.FirstName, cus.LastName } into d
+                    orderby d.Key.Id
+                    select new
+                    {
+                        d.Key.Id,
+                        d.Key.FirstName,
+                        d.Key.LastName,
+                        Count = d.Count()
+                    };
+
+        var qry11 = from ord in _context.Orders
+                    where ord.OrderDate != null
+                    group ord by new { ord.OrderDate.Month, ord.OrderDate.Year } into d
+                    select new
+                    {
+                        dt = string.Format("{0}/{1}", d.Key.Month, d.Key.Year),
+                        dtstring = (new DateTime(d.Key.Year, d.Key.Month, 1)).ToString("MMMM/yyyy"),
+                        count = d.Count()
+                    };
+
+        var qry12 = from ordd in _context.OrderDetails
+                    join inv in _context.InventoryTransactions
+                    on new { ordd.OrderId, ordd.ProductId } equals new { OrderId = inv.CustomerOrderId, inv.ProductId }
+                    select new { ordd.OrderId, ordd.ProductId, inv.Comments };
+
+        var qry13 = from cus in _context.Customers
+                    join ord in _context.Orders on cus.Id equals ord.CustomerId
+                    group ord by new { cus.Id, cus.FirstName, cus.LastName } into d
+                    select new
+                    {
+                        d.Key.Id,
+                        d.Key.FirstName,
+                        d.Key.LastName,
+                        count = d.Count(x => x != null)
+                    };
+
+        var qry14 = from cus in _context.Customers
+                    join ord in _context.Orders on cus.Id equals ord.CustomerId into cusord
+                    from cusordl in cusord.DefaultIfEmpty()
+                    group cusordl by new { cus.Id, cus.FirstName, cus.LastName } into d
+                    select new
+                    {
+                        d.Key.Id,
+                        d.Key.FirstName,
+                        d.Key.LastName,
+                        count = d.Count(x => x != null)
+                    };
+
+
+        return await qry6.ToListAsync();
+
+    }
+
+    [HttpGet("exercise")]
+    public async Task<ActionResult<dynamic>> TestQueryExe()
+    {
+        // var qry1 = from e in _context.Employees
+        //            select new
+        //            {
+        //                e.FirstName,
+        //                e.LastName,
+        //                e.City,
+        //                e.CountryRegion
+        //            };
+
+        var qry1 = from cus in _context.Customers
+                   where cus.JobTitle == "Owner" && cus.City == "Seattle"
+                   select new
+                   {
+                       cus.FirstName,
+                       cus.LastName,
+                       cus.JobTitle,
+                       cus.City
+                   };
+
+        var qry2 = from cus in _context.Customers
+                   join ord in _context.Orders on cus.Id equals ord.CustomerId
+                   where cus.City == "Seattle" && ord.OrderDate >= new DateTime(2006, 03, 01) && ord.OrderDate < new DateTime(2006, 3, 31)
+                   select new
+                   {
+                       ord.Id,
+                       cus.FirstName,
+                       cus.City,
+                       ord.OrderDate
+                   };
+
+        var qry3 = from ord in _context.Orders
+                   group ord by new { ord.ShipName } into ordg
+                   select new
+                   {
+                       ordg.Key.ShipName,
+                       orderCount = ordg.Count()
+                   };
+
+        var qry4 = from ord in _context.Orders
+                   join shipper in _context.Shippers on ord.ShipperId equals shipper.Id into ordshipper
+                   from ordershipperlist in ordshipper.DefaultIfEmpty()
+                   group ord by new { ordershipperlist.Company } into ordg
+                   select new
+                   {
+                       ordg.Key.Company,
+                       orderCount = ordg.Count(x => x != null)
+                   };
+
+
+        var qry5 = from ord in _context.Orders
+                   join ordd in _context.OrderDetails on ord.Id equals ordd.OrderId
+                   join p in _context.Products on ordd.ProductId equals p.Id
+                   where p.Category == "Beverages" && ord.OrderDate >= new DateTime(2006, 03, 01) && ord.OrderDate < new DateTime(2006, 3, 31)
+                   group ordd by new { p.Id, p.ProductName, p.Category } into g
+                   select new
+                   {
+                       g.Key.Id,
+                       g.Key.ProductName,
+                       g.Key.Category,
+                       totalOrderAmount = g.Sum(x => x.Quantity * x.UnitPrice)
+                   };
+
+        var qry6 = from p in _context.Products
+                   join orderdetail in _context.OrderDetails on p.Id equals orderdetail.ProductId into ordd
+                   from orddlist in ordd.DefaultIfEmpty()
+                   join purchaseordd in _context.PurchaseOrderDetails on orddlist.ProductId equals purchaseordd.ProductId into purchaseorder
+                   from purchaseordlist in purchaseorder.DefaultIfEmpty()
+                   group new { orddlist, purchaseordlist } by new { p.Id, p.ProductName } into g
+                   select new
+                   {
+                       g.Key.Id,
+                       g.Key.ProductName,
+                       balanceQuantity = g.Sum(x => (x.purchaseordlist != null ? x.purchaseordlist.Quantity : 0) - (x.orddlist != null ? x.orddlist.Quantity : 0))
+                   };
+
+        var qry7 = from cus in _context.Customers
+                   join ord in _context.Orders on cus.Id equals ord.CustomerId into order
+                   from orderlist in order.DefaultIfEmpty()
+                   join ordd in _context.OrderDetails on orderlist.Id equals ordd.OrderId into orderd
+                   from orderdlist in orderd.DefaultIfEmpty()
+                   where cus.City == "New York" && orderlist.OrderDate >= new DateTime(2006, 03, 01) && orderlist.OrderDate < new DateTime(2006, 3, 31)
+                   group orderdlist by new { cus.Id, cus.FirstName } into g
+                   select new
+                   {
+                       g.Key.Id,
+                       g.Key.FirstName,
+                       totalOrderAmount = g.Sum(x => x.Quantity * x.UnitPrice)
+                   };
+
+        return await qry7.ToListAsync();
+    }
+}
+
