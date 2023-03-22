@@ -1,10 +1,12 @@
 using System;
 using System.Collections.Generic;
+using System.Dynamic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Serilog;
 using TodoApi.Models;
 using TodoApi.Repositories;
 using TodoApi.Util;
@@ -13,7 +15,7 @@ namespace TodoApi.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class CustomerController : ControllerBase
+    public class CustomerController : BaseController<CustomerController>
     {
         private readonly IRepositoryWrapper _repositoryWrapper;
 
@@ -70,6 +72,9 @@ namespace TodoApi.Controllers
             {
                 await _repositoryWrapper.Customer.UpdateAsync(customer);
 
+                // ! EventLog
+                await _repositoryWrapper.EventLog.Update(customer);
+
                 FileService.DeleteFileNameOnly("CustomerPhoto", id.ToString());
                 FileService.MoveTempFile("CustomerPhoto",
                                          customer.Id.ToString(),
@@ -100,6 +105,9 @@ namespace TodoApi.Controllers
 
             await _repositoryWrapper.Customer.CreateAsync(customer);
 
+            // ! EventLog
+            await _repositoryWrapper.EventLog.Insert(customer);
+
             // ? File Upload
             if (customer.CustomerPhoto != null && customer.CustomerPhoto != "")
             {
@@ -128,6 +136,8 @@ namespace TodoApi.Controllers
 
             await _repositoryWrapper.Customer.DeleteAsync(customer, true);
 
+            // ! EventLog
+            await _repositoryWrapper.EventLog.Delete(customer);
 
             // ? Single File Delete
             FileService.DeleteFileNameOnly("CustomerPhoto", id.ToString());
@@ -141,12 +151,19 @@ namespace TodoApi.Controllers
 
         // Search
 
-        [HttpPost("search/{term}")]
-        public async Task<ActionResult<IEnumerable<CustomerRequest>>> SearchCustomer(string term)
+        [HttpPost("search/{filter}")]
+        // public async Task<ActionResult<IEnumerable<CustomerRequest>>> SearchCustomer(string term)
+        // {
+        //     var empList = await _repositoryWrapper.Customer.SearchCustomer(term);
+        //     return Ok(empList);
+        // }
+
+        public async Task<ActionResult<IEnumerable<CustomerSearchPayload>>> SearchCustomerCombo(string filter)
         {
-            var empList = await _repositoryWrapper.Customer.SearchCustomer(term);
-            return Ok(empList);
+            var cusList = await _repositoryWrapper.Customer.SearchCustomerCombo(filter);
+            return Ok(cusList);
         }
+
 
         [HttpPost("searchcustomer")]
         public async Task<ActionResult<IEnumerable<CustomerRequest>>> SearchCustomerMultiple(CustomerResult SearchObj)

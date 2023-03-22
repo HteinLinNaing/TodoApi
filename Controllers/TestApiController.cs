@@ -4,7 +4,7 @@ namespace TodoApi.Controllers;
 
 [ApiController]
 [Route("[controller]")]
-public class TestApiCotroller : ControllerBase
+public class TestApiCotroller : BaseController<TestApiCotroller>
 {
 
     public TestApiCotroller()

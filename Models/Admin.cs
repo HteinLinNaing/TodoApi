@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 namespace TodoApi.Models
 {
     [Table("tbl_admins")]
-    public class Admin
+    public class Admin : BaseModel
     {
         [Column("id")]
         [Key]
@@ -27,6 +27,10 @@ namespace TodoApi.Models
         [Required]
         [Column("password")]
         public string? Password { get; set; }
+
+        [Required]
+        [Column("salt")]
+        public string? Salt { get; set; }
 
         [Column("is_active")]
         public bool IsActive { get; set; }

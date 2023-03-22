@@ -13,7 +13,7 @@ namespace TodoApi.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class AdminController : ControllerBase
+    public class AdminController : BaseController<AdminController>
     {
         private readonly IRepositoryWrapper _repositoryWrapper;
 
@@ -45,38 +45,52 @@ namespace TodoApi.Controllers
             return AdminToDTO(admin);
         }
 
-        // PUT: api/Admin/5
+        //! PUT: api/Admin/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateAdmin(int id, AdminRequest adminRequest)
+        public async Task<IActionResult> UpdateAdmin(int id, AdminUpdateRequest adminUpdateRequest)
         {
-            if (id != adminRequest.Id)
+            if (id != adminUpdateRequest.Id)
             {
                 return BadRequest();
             }
 
             var admin = await _repositoryWrapper.Admin.FindByIDAsync(id);
+
             if (admin == null)
             {
                 return NotFound();
             }
 
-            admin.AdminName = adminRequest.AdminName;
-            admin.Email = adminRequest.Email;
-            admin.LoginName = adminRequest.LoginName;
-            admin.Password = adminRequest.Password;
-            admin.IsActive = adminRequest.IsActive;
-            admin.AdminLevelId = adminRequest.AdminLevelId;
-            admin.AdminPhoto = adminRequest.AdminPhoto;
+            admin.AdminName = adminUpdateRequest.AdminName;
+            admin.Email = adminUpdateRequest.Email;
+            admin.LoginName = adminUpdateRequest.LoginName;
+            admin.IsActive = adminUpdateRequest.IsActive;
+            admin.AdminLevelId = adminUpdateRequest.AdminLevelId;
+            admin.AdminPhoto = adminUpdateRequest.AdminPhoto;
 
             try
             {
-                await _repositoryWrapper.Admin.UpdateAsync(admin);
+                try
+                {
+                    await _repositoryWrapper.Admin.UpdateAsync(admin);
 
-                FileService.DeleteFileNameOnly("AdminPhoto", id.ToString());
-                FileService.MoveTempFile("AdminPhoto",
-                                         admin.Id.ToString(),
-                                         admin.AdminPhoto);
+                    // ! EventLog
+                    await _repositoryWrapper.EventLog.Update(admin);
+                }
+                catch (Exception ex)
+                {
+                    // ! EventLog
+                    await _repositoryWrapper.EventLog.Error("Update Fail", ex.Message);
+                }
+
+                if (admin.AdminPhoto != null || admin.AdminPhoto == "")
+                {
+                    FileService.DeleteFileNameOnly("AdminPhoto", id.ToString());
+                    FileService.MoveTempFile("AdminPhoto",
+                                             admin.Id.ToString(),
+                                             admin.AdminPhoto);
+                }
             }
             catch (DbUpdateConcurrencyException) when (!AdminExists(id))
             {
@@ -86,7 +100,7 @@ namespace TodoApi.Controllers
             return NoContent();
         }
 
-        // POST: api/Admin
+        //! POST: api/Admin
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
         public async Task<ActionResult<AdminRequest>> CreateAdmin(AdminRequest adminRequest)
@@ -97,13 +111,22 @@ namespace TodoApi.Controllers
                 AdminName = adminRequest.AdminName,
                 Email = adminRequest.Email,
                 LoginName = adminRequest.LoginName,
-                Password = adminRequest.Password,
                 IsActive = adminRequest.IsActive,
                 AdminLevelId = adminRequest.AdminLevelId,
                 AdminPhoto = adminRequest.AdminPhoto,
             };
 
+            var password = adminRequest.Password ?? throw new Exception("null");
+
+            // ! Password Hash
+            string salt = Util.SaltedHash.GenerateSalt();
+            password = Util.SaltedHash.ComputeHash(salt, password.ToString());
+            admin.Password = password;
+            admin.Salt = salt;
+
             await _repositoryWrapper.Admin.CreateAsync(admin);
+
+            await _repositoryWrapper.EventLog.Insert(admin);    //! EventLog
 
             // ? File Upload
             if (admin.AdminPhoto != null && admin.AdminPhoto != "")
@@ -120,7 +143,7 @@ namespace TodoApi.Controllers
                 AdminToDTO(admin));
         }
 
-        // DELETE: api/Admin/5
+        //! DELETE: api/Admin/5
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteAdmin(int id)
         {
@@ -131,8 +154,16 @@ namespace TodoApi.Controllers
                 return NotFound();
             }
 
-            await _repositoryWrapper.Admin.DeleteAsync(admin, true);
+            try
+            {
+                await _repositoryWrapper.Admin.DeleteAsync(admin, true);
 
+                await _repositoryWrapper.EventLog.Delete(admin);
+            }
+            catch (Exception ex)
+            {
+                await _repositoryWrapper.EventLog.Error("Delete Failed : ", ex.Message);
+            }
 
             // ? Single File Delete
             FileService.DeleteFileNameOnly("AdminPhoto", id.ToString());
@@ -140,11 +171,10 @@ namespace TodoApi.Controllers
             // ? Multiple File Delete
             // FileService.DeleteDir("AdminPhoto", id.ToString());
 
-
             return NoContent();
         }
 
-        // Search
+        //! Search
 
         [HttpPost("search/{term}")]
         public async Task<ActionResult<IEnumerable<AdminRequest>>> SearchAdmin(string term)

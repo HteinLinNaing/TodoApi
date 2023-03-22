@@ -12,7 +12,7 @@ namespace TodoApi.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class EmployeeController : ControllerBase
+    public class EmployeeController : BaseController<EmployeeController>
     {
         private readonly IRepositoryWrapper _repositoryWrapper;
 

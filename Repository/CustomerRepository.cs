@@ -2,6 +2,8 @@ using System.Data;
 using TodoApi.Models;
 using Microsoft.EntityFrameworkCore;
 using System.Linq;
+using System.Dynamic;
+using Serilog;
 
 namespace TodoApi.Repositories
 {
@@ -14,6 +16,28 @@ namespace TodoApi.Repositories
             return await RepositoryContext.Customers
                         .Where(s => s.CustomerName.Contains(searchTerm))
                         .OrderBy(s => s.Id).ToListAsync();
+        }
+
+        public async Task<List<CustomerSearchPayload>> SearchCustomerCombo(string filter)
+        {
+            try
+            {
+                ExpandoObject queryFilter = new();
+                queryFilter.TryAdd("@filter", "%" + filter + "%");
+                queryFilter.TryAdd("@filterid", filter);
+                queryFilter.TryAdd("@filteraddress", filter);
+
+                var SelectQuery = @"SELECT customer_id AS Id, customer_name AS Name, customer_address AS Address FROM tbl_customer WHERE customer_name LIKE @filter OR customer_id = @filterid OR customer_address = @filteraddress ORDER BY customer_name LIMIT 0, 5";
+
+                List<CustomerSearchPayload> custResult = await RepositoryContext.RunExecuteSelectQuery<CustomerSearchPayload>(SelectQuery, queryFilter);
+
+                return custResult;
+            }
+            catch (Exception ex)
+            {
+                Log.Error("GetCustomerCombo fail " + ex.Message);
+                return new List<CustomerSearchPayload>();
+            }
         }
 
         public async Task<IEnumerable<CustomerResult>> ListCustomer()

@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace TodoApi.Models
 {
-    public class AdminRequest
+    public class AdminUpdateRequest
     {
         public int Id { get; set; }
 
@@ -19,7 +19,7 @@ namespace TodoApi.Models
         public string LoginName { get; set; } = string.Empty;
 
         [Required]
-        public string? Password { get; set; }
+        // public string? Password { get; set; }
         // public string? Salt { get; set; }
 
         public bool IsActive { get; set; }

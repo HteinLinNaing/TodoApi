@@ -12,7 +12,7 @@ namespace TodoApi.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class FileServiceController : ControllerBase
+    public class FileServiceController : BaseController<FileServiceController>
     {
         private readonly IRepositoryWrapper _repositoryWrapper;
         private static readonly IConfiguration _configuration = Startup.StaticConfiguration!;

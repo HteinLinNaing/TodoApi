@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Microsoft.OpenApi.Models;
+using TodoApi.CustomTokenAuthProvider;
 using TodoApi.Extensions;
 
 namespace TodoApi
@@ -24,6 +25,8 @@ namespace TodoApi
             services.ConfigureMySqlContext(Configuration);
 
             services.ConfigureRepositoryWrapper();
+
+            services.AddTransient<TokenProviderMiddleware>();
 
             services.AddHttpContextAccessor();
             services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
@@ -74,6 +77,10 @@ namespace TodoApi
             app.UseHttpsRedirection();
 
             app.UseRouting();
+
+            app.UseAuthentication();
+
+            app.UseTokenProviderMiddleware();
 
             app.UseEndpoints(endpoints =>
             {

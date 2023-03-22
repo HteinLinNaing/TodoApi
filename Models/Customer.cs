@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 namespace TodoApi.Models
 {
     [Table("tbl_customer")]
-    public class Customer
+    public class Customer : BaseModel
     {
         [Column("customer_id")]
         [Key]

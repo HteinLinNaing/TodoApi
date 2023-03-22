@@ -38,7 +38,7 @@ namespace TodoApi.Repositories
                             AdminName = e.AdminName,
                             Email = e.Email,
                             LoginName = e.LoginName,
-                            Password = e.Password,
+                            // Password = e.Password,
                             IsActive = e.IsActive,
                             AdminPhoto = e.AdminPhoto,
                             AdminLevelId = e.AdminLevelId,
@@ -63,5 +63,4 @@ namespace TodoApi.Repositories
             throw new NotImplementedException();
         }
     }
-
 }

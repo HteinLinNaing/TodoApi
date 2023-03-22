@@ -75,5 +75,31 @@ namespace TodoApi.Repositories
                 return oAdmin;
             }
         }
+
+        private IOTPRepository? oOTP;
+        public IOTPRepository OTP
+        {
+            get
+            {
+                if (oOTP == null)
+                {
+                    oOTP = new OTPRepository(_repoContext);
+                }
+                return oOTP;
+            }
+        }
+
+        private IEventLogRepository? oEventLog;
+        public IEventLogRepository EventLog
+        {
+            get
+            {
+                if (oEventLog == null)
+                {
+                    oEventLog = new EventLogRepository(_repoContext);
+                }
+                return oEventLog;
+            }
+        }
     }
 }

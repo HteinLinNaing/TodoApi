@@ -12,7 +12,7 @@ namespace TodoApi.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class HeroController : ControllerBase
+    public class HeroController : BaseController<HeroController>
     {
         private readonly IRepositoryWrapper _repositoryWrapper;
 

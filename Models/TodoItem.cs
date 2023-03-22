@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 namespace TodoApi.Models
 {
     [Table("todo_items")]
-    public class TodoItem
+    public class TodoItem : BaseModel
     {
         [Column("id")]
         public long Id { get; set; }

@@ -7,5 +7,7 @@
         IEmployeeRepository Employee { get; }
         ICustomerRepository Customer { get; }
         IAdminRepository Admin { get; }
+        IOTPRepository OTP { get; }
+        IEventLogRepository EventLog { get; }
     }
 }

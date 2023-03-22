@@ -3,6 +3,9 @@ using System.Linq.Expressions;
 using TodoApi.Models;
 using Microsoft.EntityFrameworkCore;
 using System.Data;
+using Newtonsoft.Json.Linq;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
+using Serilog;
 
 namespace TodoApi.Repositories
 {
@@ -93,6 +96,7 @@ namespace TodoApi.Repositories
 
         public void Update(dynamic entity, bool flush = true)
         {
+            entity.SetEventLogMessage(this.GetUpdateEventLogString(entity));
             this.RepositoryContext.Set<T>().Update(entity);
             if (flush)
             {
@@ -103,19 +107,21 @@ namespace TodoApi.Repositories
 
         public void UpdateRange(dynamic entity, bool flush = true)
         {
+            entity.SetEventLogMessage(this.GetUpdateEventLogString(entity));
             this.RepositoryContext.Set<T>().UpdateRange(entity);
             if (flush) this.Save();
         }
 
         public void Delete(dynamic entity, bool flush = true)
         {
+            entity.SetEventLogMessage(this.SetOldObjectToString(entity));
             this.RepositoryContext.Set<T>().Remove(entity);
             if (flush) this.Save();
         }
 
         public void DeleteRange(dynamic entity, bool flush = true)
         {
-            //entity.SetEventLogMessage(this.SetOldObjectToString(entity));
+            entity.SetEventLogMessage(this.SetOldObjectToString(entity));
             this.RepositoryContext.Set<T>().RemoveRange(entity);
             if (flush) this.Save();
         }
@@ -142,12 +148,14 @@ namespace TodoApi.Repositories
 
         public async Task UpdateAsync(dynamic entity, bool flush = true)
         {
+            entity.SetEventLogMessage(this.GetUpdateEventLogString(entity));
             this.RepositoryContext.Set<T>().Update(entity);
             if (flush) await this.SaveAsync();
         }
 
         public async Task DeleteAsync(dynamic entity, bool flush = true)
         {
+            entity.SetEventLogMessage(this.SetOldObjectToString(entity));
             this.RepositoryContext.Set<T>().Remove(entity);
             if (flush) await this.SaveAsync();
         }
@@ -158,6 +166,56 @@ namespace TodoApi.Repositories
         }
 
         
+        public string SetOldObjectToString(dynamic OldObj)
+        {
+            this.OldObjString = "";
+            JObject _duplicateObj = JObject.FromObject(OldObj);
+            var _List = _duplicateObj.ToObject<Dictionary<string, object>>();
+            if(_List != null) {
+                foreach (var item in _List)
+                {
+                    var name = item.Key;
+                    var val = item.Value;
+                    string msg = name + " : " + val + "\r\n";
+                    this.OldObjString += msg;
+                }
+            }
+            return this.OldObjString;
+        }
+
+        public string GetOldObjectString()
+        {
+            return this.OldObjString ?? "";
+        }
+        
+        public String GetUpdateEventLogString(dynamic entity)
+        {
+            PropertyValues  oldObj;
+            string oldObjString = "";
+            try
+            {
+                oldObj = this.RepositoryContext.Entry(entity).OriginalValues;
+                if (oldObj == null) return "";
+                JObject _newObj = JObject.FromObject(entity);
+                var _newList = _newObj.ToObject<Dictionary<string, object>>();
+
+                foreach (var item in oldObj.Properties)
+                {
+                    var name = item.Name;
+                    var val = oldObj[name] != null ? oldObj[name]!.ToString()!.Trim() : "";
+                    var newval = _newList != null ? (_newList.GetValueOrDefault(name) != null ? _newList.GetValueOrDefault(name)!.ToString()!.Trim() : "") : "";
+                    string msg = "";
+                    if(val != newval || item.IsKey()) msg = name + " : " + val + " >>> " + newval + "\r\n";   //include primary key and changes fields only
+                    oldObjString += msg;
+                }
+            }
+            catch (Exception ex)
+            {
+                Log.Error("GetUpdateEventLogString Exception :" + ex.Message);
+            }
+            return oldObjString;
+        }
+       
 
     }
     
