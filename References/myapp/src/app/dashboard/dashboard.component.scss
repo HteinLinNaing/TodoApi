@@ -1,0 +1,124 @@
+/* DashboardComponent's private CSS styles */
+
+h2 {
+  text-align: center;
+}
+
+.heroes-menu,
+.todo-menu,
+.hero-search,
+.todo-search {
+  padding: 0;
+  margin: auto;
+  max-width: 1000px;
+
+  /* flexbox */
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: space-around;
+  align-content: flex-start;
+  align-items: flex-start;
+}
+
+.hero-search {
+  justify-content: space-evenly !important;
+}
+
+.hero-search input,
+.todo-search input {
+  padding: 15px 8px;
+  border: 1px solid #333;
+  background-color: #eee;
+  width: 85%;
+  font-size: 1rem;
+}
+
+.hero-search button,
+.todo-search button {
+  background-color: #eee;
+  border: 1px solid #333;
+  border-radius: 0px;
+  cursor: pointer;
+  color: black;
+  font-size: 1.2rem;
+  padding: 0.8rem;
+  margin: 0;
+}
+
+a {
+  background-color: #3f525c;
+  border-radius: 2px;
+  padding: 1rem;
+  font-size: 1.2rem;
+  text-decoration: none;
+  display: inline-block;
+  color: #fff;
+  text-align: center;
+  width: 100%;
+  min-width: 70px;
+  margin: .5rem auto;
+  box-sizing: border-box;
+
+  /* flexbox */
+  order: 0;
+  flex: 0 1 auto;
+  align-self: auto;
+}
+
+@media (min-width: 600px) {
+  a {
+    width: 18%;
+    box-sizing: content-box;
+  }
+}
+
+a:hover {
+  background-color: #000;
+}
+
+// ! Hero Search Result
+.hero-search-result,
+.todo-search-result {
+  margin: 20px auto;
+  list-style-type: none;
+  padding: 0;
+  width: 500px;
+}
+
+.hero-search-result li,
+.todo-search-result li {
+  position: relative;
+  cursor: pointer;
+}
+
+.hero-search-result li:hover,
+.todo-search-result li:hover {
+  left: .1em;
+}
+
+.hero-search-result a,
+.todo-search-result a {
+  color: #333;
+  text-decoration: none;
+  background-color: #EEE;
+  margin: .5em;
+  padding: .3em 0;
+  height: 1.6em;
+  line-height: 1.6em;
+  border-radius: 4px;
+  display: block;
+  width: 100%;
+}
+
+.hero-search-result a:hover,
+.todo-search-result a:hover {
+  color: #2c3a41;
+  background-color: #e6e6e6;
+}
+
+.hero-search-result a:active,
+.todo-search-result a:active {
+  background-color: #525252;
+  color: #fafafa;
+}

@@ -4,6 +4,8 @@ using Microsoft.EntityFrameworkCore;
 using System.Linq;
 using System.Dynamic;
 using Serilog;
+using Kendo.Mvc.UI;
+using Kendo.Mvc.Extensions;
 
 namespace TodoApi.Repositories
 {
@@ -67,6 +69,21 @@ namespace TodoApi.Repositories
                             CustomerType = e.CustomerType!.CustomerTypeName
                         })
                         .OrderBy(s => s.Id).ToListAsync();
+        }
+
+        public async Task<DataSourceResult> GetCustomerInfoGrid(DataSourceRequest request)
+        {
+            var mainQuery = (from main in RepositoryContext.Customers
+                             join ct in RepositoryContext.CustomerTypes on main.CustomerTypeId equals ct.CustomerTypeId
+                             select new
+                             {
+                                 main.Id,
+                                 main.CustomerName,
+                                 main.CustomerAddress,
+                                 ct.CustomerTypeName,
+                                 main.CustomerTypeId
+                             });
+            return await mainQuery.ToDataSourceResultAsync(request);
         }
 
 

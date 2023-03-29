@@ -1,3 +1,4 @@
+using Kendo.Mvc.UI;
 using TodoApi.Models;
 
 namespace TodoApi.Repositories
@@ -8,6 +9,7 @@ namespace TodoApi.Repositories
         Task<List<CustomerSearchPayload>> SearchCustomerCombo(string filter);
         Task<IEnumerable<Customer>> SearchCustomerMultiple(CustomerResult SearchObj);
         Task<IEnumerable<CustomerResult>> ListCustomer();
+        Task<DataSourceResult> GetCustomerInfoGrid(DataSourceRequest request);
         bool IsExists(long id);
     }
 }

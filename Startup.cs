@@ -78,9 +78,9 @@ namespace TodoApi
 
             app.UseRouting();
 
-            app.UseAuthentication();
+            // app.UseAuthentication();
 
-            app.UseTokenProviderMiddleware();
+            // app.UseTokenProviderMiddleware();
 
             app.UseEndpoints(endpoints =>
             {

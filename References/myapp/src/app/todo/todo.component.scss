@@ -1,0 +1,100 @@
+/* HeroesComponent's private CSS styles */
+.todos {
+  margin: 0 0 2em 0;
+  list-style-type: none;
+  padding: 0;
+  width: 700px;
+}
+
+.todos li {
+  position: relative;
+  cursor: pointer;
+}
+
+.todos li:hover {
+  left: .1em;
+}
+
+.todos a {
+  color: #333;
+  text-decoration: none;
+  background: #eee;
+  padding: 8px 5px;
+  padding-left: 15px;
+  display: inline-block;
+  width: 450px;
+  height: 1.6em;
+  line-height: 1.6em;
+  margin: .5em 0;
+}
+
+.todos li a.completed {
+  text-decoration: line-through !important;
+  color: rgb(180, 8, 8);
+}
+
+.todos a:hover {
+  color: #2c3a41;
+  background-color: #e6e6e6;
+}
+
+.todos a:active {
+  background-color: #525252;
+  color: #fafafa;
+}
+
+.todos .badge {
+  background-color: #405061;
+  padding: 8px 5px;
+  padding-left: 20px;
+  display: inline-block;
+  width: 25px;
+  height: 1.6em;
+  line-height: 1.6em;
+  margin: .5em 0;
+  color: #fafafa;
+  border-radius: 4px 0 0 4px;
+}
+
+.todos .delete {
+  background-color: #5e2b2b;
+  color: #fafafa;
+  font-size: 1em;
+  padding: 8px 5px;
+  padding-left: 20px;
+  display: inline-block;
+  width: 25px !important;
+  height: 1.6em;
+  line-height: 1.6em;
+  margin: .5em 0;
+  border-radius: 0 4px 4px 0;
+}
+
+.todos .done {
+  background-color: #1e6553;
+  color: #fafafa;
+  font-size: 1em;
+  padding: 8px 15px;
+  // padding-left: 20px;
+  display: inline-block;
+  width: 40px !important;
+  height: 1.6em;
+  line-height: 1.6em;
+  margin: .5em 0;
+  border-radius: 0;
+}
+
+.form-control {
+  margin-bottom: 10px;
+}
+
+.form-control label {
+  display: block;
+}
+
+.form-control input {
+  padding: 8px;
+  background-color: #eee;
+  border: 1px solid #333;
+  border-radius: 4px;
+}

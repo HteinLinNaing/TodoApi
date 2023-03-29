@@ -101,5 +101,44 @@ namespace TodoApi.Repositories
                 return oEventLog;
             }
         }
+
+        private ICustomerTypeRepository? oCustomerType;
+        public ICustomerTypeRepository CustomerType
+        {
+            get
+            {
+                if (oCustomerType == null)
+                {
+                    oCustomerType = new CustomerTypeRepository(_repoContext);
+                }
+                return oCustomerType;
+            }
+        }
+
+        private ISupplierRepository? oSupplier;
+        public ISupplierRepository Supplier
+        {
+            get
+            {
+                if (oSupplier == null)
+                {
+                    oSupplier = new SupplierRepository(_repoContext);
+                }
+                return oSupplier;
+            }
+        }
+
+        private ISupplierTypeRepository? oSupplierType;
+        public ISupplierTypeRepository SupplierType
+        {
+            get
+            {
+                if (oSupplierType == null)
+                {
+                    oSupplierType = new SupplierTypeRepository(_repoContext);
+                }
+                return oSupplierType;
+            }
+        }
     }
 }

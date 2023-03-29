@@ -9,5 +9,8 @@
         IAdminRepository Admin { get; }
         IOTPRepository OTP { get; }
         IEventLogRepository EventLog { get; }
+        ICustomerTypeRepository CustomerType { get; }
+        ISupplierRepository Supplier { get; }
+        ISupplierTypeRepository SupplierType { get; }
     }
 }

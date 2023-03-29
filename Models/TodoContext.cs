@@ -37,6 +37,12 @@ namespace TodoApi.Models
 
         public DbSet<Customer> Customers { get; set; } = null!;
 
+        public DbSet<CustomerType> CustomerTypes { get; set; } = null!;
+
+        public DbSet<Supplier> Suppliers { get; set; } = null!;
+
+        public DbSet<SupplierType> SupplierTypes { get; set; } = null!;
+
         public DbSet<Admin> Admins { get; set; } = null!;
         public DbSet<OTP> OTPs { get; set; } = null!;
         public DbSet<EventLog> EventLogs { get; set; } = null!;

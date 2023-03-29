@@ -1,0 +1,47 @@
+<!-- ! Top Five Hero -->
+<h2>Top Heroes</h2>
+<div class="heroes-menu">
+  <a *ngFor="let hero of heroes" routerLink="/hero-detail/{{hero.Id}}">
+    {{hero.Name}}
+  </a>
+</div>
+
+<!-- ! Top Five Todo -->
+<h2>Top Todo List</h2>
+<div class="todo-menu">
+  <a *ngFor="let todo of todos" routerLink="/todo-detail/{{todo.Id}}">
+    {{todo.Name}}
+  </a>
+</div>
+
+<!-- ! Hero Search -->
+<h2>Hero Search</h2>
+<div class="hero-search">
+  <input #heroSearchTerm placeholder="Hero Search">
+  <button type="button" class="search-btn" (click)="heroSearch(heroSearchTerm.value)">
+    Search
+  </button>
+</div>
+<ul class="hero-search-result">
+  <li *ngFor="let hero of herosearch">
+    <a routerLink="/hero-detail/{{hero.Id}}">
+      {{hero.Name}}
+    </a>
+  </li>
+</ul>
+
+<!-- ! Todo Search -->
+<h2>Todo Search</h2>
+<div class="todo-search">
+  <input #todoSearchTerm placeholder="Todo Search">
+  <button type="button" class="search-btn" (click)="todoSearch(todoSearchTerm.value)">
+    Search
+  </button>
+</div>
+<ul class="todo-search-result">
+  <li *ngFor="let todo of todosearch">
+    <a routerLink="/todo-detail/{{todo.Id}}">
+      {{todo.Name}}
+    </a>
+  </li>
+</ul>

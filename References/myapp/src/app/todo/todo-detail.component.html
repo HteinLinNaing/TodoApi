@@ -1,0 +1,18 @@
+<div *ngIf="todo">
+
+  <h2>{{todo.Name | uppercase}} Details</h2>
+  <div><span>id: </span>{{todo.Id}}</div>
+  <div>
+    <div class="">
+      <label for="todo-name">Todo name: </label>
+      <input id="todo-name" [(ngModel)]="todo.Name" placeholder="name">
+    </div>
+    <div class="">
+      <label for="todo-isComplete">Is Complete: </label>
+      <input id="todo-isComplete" [(ngModel)]="todo.IsComplete" placeholder="is-complete">
+    </div>
+  </div>
+
+</div>
+<button type="button" (click)="save()">Save</button>
+<button type="button" (click)="goBack()">go back</button>

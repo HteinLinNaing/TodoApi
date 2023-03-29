@@ -15,7 +15,6 @@ namespace TodoApi.Models
         [StringLength(50)]
         public string CustomerName { get; set; } = string.Empty;
 
-        [Required]
         [Column("register_date")]
         public DateTime? RegisterDate { get; set; }
 

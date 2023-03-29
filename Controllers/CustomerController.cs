@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Dynamic;
 using System.Linq;
 using System.Threading.Tasks;
+using Kendo.Mvc.UI;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -45,6 +46,15 @@ namespace TodoApi.Controllers
             }
 
             return CustomerToDTO(customer);
+        }
+
+        // POST: api/Customer/showlist
+        [HttpPost("showlist")]
+        public async Task<JsonResult> PostCustomerGrid([DataSourceRequest] DataSourceRequest request)
+        {
+            var dsmainQuery = new JsonResult(await _repositoryWrapper.Customer.GetCustomerInfoGrid(request));
+            await _repositoryWrapper.EventLog.Info("View Customer showlist");
+            return dsmainQuery;
         }
 
         // PUT: api/Customer/5

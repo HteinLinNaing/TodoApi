@@ -1,0 +1,44 @@
+<h2>Todo List</h2>
+
+<ul class="todos">
+  <li *ngFor="let todo of todos">
+    <!-- ! Complete -->
+    <span class="badge">{{todo.Id}}</span>
+    <a *ngIf="todo.IsComplete; else elseBlock" class="completed" routerLink="/todo-detail/{{todo.Id}}">
+      {{todo.Name}}
+    </a>
+
+    <!-- ! Uncomplete -->
+    <ng-template #elseBlock>
+      <a routerLink="/todo-detail/{{todo.Id}}">
+        {{todo.Name}}
+      </a>
+    </ng-template>
+
+    <!-- ! Done Undo Button Start -->
+    <span class="done" *ngIf="!todo.IsComplete; else elseDoneBlock" type="button" title="Done Todo"
+      (click)="done(todo)">Done</span>
+
+    <ng-template #elseDoneBlock>
+      <span type="button" class="done" title="Undo Todo" (click)="undo(todo)">Undo</span>
+    </ng-template>
+    <!-- ! Done Undo Button End -->
+
+    <!-- ! Delete Button -->
+    <span type="button" class="delete" title="Delete Todo" (click)="delete(todo)">x</span>
+  </li>
+</ul>
+
+<!-- ! Add New Todo -->
+<div class="todo-add">
+  <h2>Add new todo</h2>
+  <div class="form-control">
+    <label for="new-todo">Todo Task: </label>
+    <input id="new-todo" #todoName />
+  </div>
+
+  <!-- (click) passes input value to add() and then clears the input -->
+  <button type="button" class="add-button" (click)="add(todoName.value); todoName.value=''">
+    Add todo
+  </button>
+</div>
